@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokedex - Pokemon Invasion Extension</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        header {
+            text-align: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-box {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 8px;
+            min-width: 120px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffd54f;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .collection {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .pokemon-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            backdrop-filter: blur(5px);
+        }
+        
+        .pokemon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .pokemon-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+        }
+        
+        .pokemon-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .pokemon-id {
+            color: #ffd54f;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .pokemon-types {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .type-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .capture-date {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+        
+        .caught-count {
+            font-size: 0.8rem;
+            color: #ffd54f;
+            font-weight: bold;
+        }
+        
+        .empty-collection {
+            text-align: center;
+            padding: 40px;
+            grid-column: 1 / -1;
+        }
+        
+        .empty-collection p {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            border: 2px solid white;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .pokeball-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 50%, #ffffff 50%, #f8f8f8 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .pokeball-icon::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 50%;
+            position: absolute;
+        }
+        
+        .rarity-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        
+        .rarity-common { background: #8BC34A; }
+        .rarity-uncommon { background: #2196F3; }
+        .rarity-rare { background: #9C27B0; }
+        .rarity-epic { background: #FF9800; }
+        .rarity-legendary { background: #F44336; }
+        .rarity-mythical { background: #E91E63; }
+        
+        .filter-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .filter-select option {
+            background: #333;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .collection {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .stats {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .stat-box {
+                width: 100%;
+                max-width: 200px;
+            }
+            
+            .navigation {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 250px;
+                text-align: center;
+            }
+            
+            .filter-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .filter-select {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="pokeball-icon"></div>
+            <h1>My Pokedex</h1>
+            <p class="subtitle">All the Pokemon you've captured will appear here</p>
+        </header>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number" id="totalPokemon">0</div>
+                <div>Total Captured</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="uniquePokemon">0</div>
+                <div>Unique Species</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="completion">0%</div>
+                <div>Collection Progress</div>
+            </div>
+        </div>
+        
+        <div class="filter-controls">
+            <select class="filter-select" id="generationFilter">
+                <option value="all">All Generations</option>
+                <option value="1">Generation I</option>
+                <option value="2">Generation II</option>
+                <option value="3">Generation III</option>
+                <option value="4">Generation IV</option>
+                <option value="5">Generation V</option>
+                <option value="6">Generation VI</option>
+                <option value="7">Generation VII</option>
+                <option value="8">Generation VIII</option>
+            </select>
+            
+            <select class="filter-select" id="rarityFilter">
+                <option value="all">All Rarities</option>
+                <option value="common">Common</option>
+                <option value="uncommon">Uncommon</option>
+                <option value="rare">Rare</option>
+                <option value="epic">Epic</option>
+                <option value="legendary">Legendary</option>
+                <option value="mythical">Mythical</option>
+            </select>
+            
+            <select class="filter-select" id="sortBy">
+                <option value="id">Sort by Number</option>
+                <option value="name">Sort by Name</option>
+                <option value="date">Sort by Date</option>
+                <option value="rarity">Sort by Rarity</option>
+            </select>
+        </div>
+        
+        <div class="collection" id="pokemonCollection">
+            <div class="empty-collection">
+                <div style="font-size: 4rem; margin-bottom: 20px;">🔍</div>
+                <p>Your Pokedex is empty!</p>
+                <p>Activate the Pokemon Invasion extension on any website to start hunting.</p>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <button class="btn" id="backBtn">← Back to Extension</button>
+            <button class="btn" id="resetBtn">🗑️ Reset Collection</button>
+            <button class="btn" id="exportBtn">💾 Export Data</button>
+        </div>
+        
+        <footer>
+            <p>Pokemon Invasion Extension - Powered by PokeAPI 🌍</p>
+        </footer>
+    </div>
+    <script src="js/collection.js"></script>
+</body>
+</html>

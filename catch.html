@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Catch that Pokemon!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        @import 'https://fonts.googleapis.com/css?family=Open+Sans:400,600';
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0; padding: 0; font-family: "Open Sans";
+            width: 100%; height: 100%;
+        }
+        h1, p { margin: 0; }
+        ul { margin: 0; }
+        a { color: #47d3ff; }
+        .gradient-background {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        #screen, #wrapper, #touch-layer, #waves, #info-screen {
+            position: relative; height: 100%; width: 100%;
+        }
+        #title {
+            position: fixed; text-align: center; width: 100%;
+            color: white; margin-top: 0.5em; z-index: 11;
+        }
+        #pokemon-info {
+            position: fixed; top: 60px; left: 20px; right: 20px;
+            color: white; z-index: 11; text-align: center;
+            background: rgba(0,0,0,0.5); padding: 10px;
+            border-radius: 8px; backdrop-filter: blur(10px);
+        }
+        #pokemon-info h2 { 
+            margin: 0 0 5px 0; font-size: 1.2rem; 
+        }
+        #pokemon-types {
+            display: flex; justify-content: center; gap: 8px; margin: 5px 0;
+        }
+        .type-badge {
+            padding: 4px 8px; border-radius: 12px; font-size: 0.7rem;
+            font-weight: bold; text-transform: uppercase;
+        }
+        .type-normal { background: #A8A878; }
+        .type-fire { background: #F08030; }
+        .type-water { background: #6890F0; }
+        .type-electric { background: #F8D030; }
+        .type-grass { background: #78C850; }
+        .type-ice { background: #98D8D8; }
+        .type-fighting { background: #C03028; }
+        .type-poison { background: #A040A0; }
+        .type-ground { background: #E0C068; }
+        .type-flying { background: #A890F0; }
+        .type-psychic { background: #F85888; }
+        .type-bug { background: #A8B820; }
+        .type-rock { background: #B8A038; }
+        .type-ghost { background: #705898; }
+        .type-dragon { background: #7038F8; }
+        .type-dark { background: #705848; }
+        .type-steel { background: #B8B8D0; }
+        .type-fairy { background: #EE99AC; }
+        #screen, #capture-screen, #ring-screen { position: relative; }
+        #ring-screen { height: 100%; width: 100%; position: absolute; z-index: 3; }
+        #ring {
+            display: flex; flex-direction: row; align-items: center;
+            justify-content: center; width: 150px; height: 150px;
+            border: 2px solid white; border-radius: 100px;
+        }
+        #ring-active { border: 2px solid #64DD17; border-radius: 100px; }
+        #ring-fill { width: 150px; height: 150px; }
+        #capture-screen {
+            display: flex; flex-direction: column; background-color: #222; z-index: 12;
+        }
+        #poof-container {
+            position: fixed; z-index: 10; height: 100%; width: 100%;
+            top: 0; left: 0;
+        }
+        #poof {
+            width: 100%; height: 20px; opacity: 0.8;
+            background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/374756/pkmngo-poof.svg');
+            background-repeat: no-repeat; background-position: center center;
+            background-size: contain;
+        }
+        #capture-ball {
+            position: relative; width: 200px; height: 200px;
+            background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/374756/pkmngo-pokeball.png');
+            background-repeat: no-repeat; background-position: center center;
+            background-size: cover;
+        }
+        #capture-ball-button-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;
+        }
+        #capture-ball-button {
+            width: 30px; height: 30px; margin-top: -20px; border-radius: 20px;
+            opacity: 0.8; background-color: red;
+        }
+        #target-container { position: relative; }
+        #target {
+            width: 140px; height: 140px; transform: rotate(-10deg);
+            background-repeat: no-repeat; background-position: center center;
+            background-size: contain; z-index: 2;
+        }
+        #ball {
+            position: fixed; height: 50px; width: 50px; border-radius: 25px;
+            bottom: 10%;
+            background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/374756/pkmngo-pokeball.png');
+            background-repeat: no-repeat; background-position: center center;
+            background-size: cover; z-index: 3;
+        }
+        #touch-layer {
+            position: fixed; top: 0; left: 0; opacity: 0; z-index: 10;
+        }
+        #capture-status {
+            position: absolute; font-size: 1.5em; top: 0; left: 0;
+            width: 100%; text-align: center; padding: 1em 0.2em; color: #FFF;
+        }
+        #particles { position: fixed; width: 100%; height: 100%; z-index: 1; }
+        .particle {
+            position: fixed; width: 7px; height: 7px; background-color: #fff;
+            border-radius: 5px; opacity: 0.7; z-index: 1;
+        }
+        #capture-confetti { position: fixed; width: 100%; height: 100%; z-index: 6; }
+        #capture-confetti > div.particle {
+            height: 10px; width: 10px; opacity: 0.9; background-color: #4aa6fb;
+        }
+        .flex-center, #screen, #capture-screen, #ring-screen, #poof-container, #capture-ball-button-container, #target-container {
+            display: flex; align-items: center; justify-content: center;
+        }
+        .fixed-full-width, #capture-screen, #info-screen, #info-shade, #info-text {
+            position: fixed; width: 100%; height: 100%; top: 0; left: 0;
+        }
+        .hidden { display: none !important; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zingtouch/1.0.6/zingtouch.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+</head>
+<body>
+    <section id="wrapper">
+        <div id="title">
+            <h1>Catch that Pokemon!</h1>
+            <span>Pokemon Invasion Extension</span>
+        </div>
+        
+        <div id="pokemon-info" class="hidden">
+            <h2 id="pokemon-name">Pokemon</h2>
+            <div id="pokemon-types"></div>
+            <div id="pokemon-stats">Generation <span id="pokemon-generation">1</span></div>
+        </div>
+        
+        <div id="touch-layer"></div>
+        <div id="particles"></div>
+        
+        <div id="ring-screen">
+            <div id="ring">
+                <div id="ring-active">
+                    <div id="ring-fill"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="screen" class="gradient-background">
+            <div id="target-container">
+                <div id="target"></div>
+            </div>
+            <div id="ball"></div>
+            <div id="output"></div>
+        </div>
+      
+        <div id="capture-screen" class="gradient-background hidden">
+            <div id="capture-status" class="hidden">You caught the Pokemon!</div>
+            <div id="poof-container" class="hidden">
+                <div id="poof"></div>
+            </div>
+            <div id="capture-confetti"></div>
+            <div id="capture-ball"></div>
+            <div id="capture-ball-button-container" class="hidden">
+                <div id="capture-ball-button"></div>
+            </div>
+        </div>
+    </section>
+    <script src="js/anime.min.js"></script>
+    <script src="js/zingtouch.min.js"></script>
+    <script src="js/sweetalert.min.js"></script>
+    <script src="js/catch.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "Pokemon Invasion",
+  "version": "2.0",
+  "description": "Catch Pokemon that appear randomly on any website! Click them to start the capture mini-game powered by PokeAPI.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://pokeapi.co/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Pokemon Invasion",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "js/pokemon-service.js",
+        "js/content.js",
+        "js/anime.min.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["catch.html", "collection.html", "js/*.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

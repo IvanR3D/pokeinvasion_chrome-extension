@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            width: 280px;
+            padding: 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin: 0 0 5px 0;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .status-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+        }
+
+        .status-btn.active {
+            background: #4CAF50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.7);
+        }
+
+        .status-btn.inactive {
+            background: #f44336;
+        }
+
+        .pokeball-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 10px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 50%, #ffffff 50%, #f8f8f8 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #333;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .pokeball-icon::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        .toggle-btn {
+            background: rgba(76, 175, 80, 0.3);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+        }
+
+        .toggle-btn.stop-mode {
+            background: rgba(244, 67, 54, 0.3);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+        }
+
+        .collection-btn {
+            background: rgba(255, 193, 7, 0.3);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        button:disabled::before {
+            display: none;
+        }
+
+        .generation-selector {
+            margin-bottom: 15px;
+        }
+
+        .generation-selector label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 0.85rem;
+            backdrop-filter: blur(10px);
+        }
+
+        select option {
+            background: #333;
+            color: white;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .footer a {
+            color: #ffd54f;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="status-btn inactive" id="statusBtn" title="Click to toggle invasion status"></div>
+        <div class="pokeball-icon"></div>
+        <h1>Pokemon Invasion</h1>
+        <p>Catch Pokemon on any website!</p>
+    </div>
+
+    <div class="generation-selector">
+        <label for="generationSelect">Pokemon Generation:</label>
+        <select id="generationSelect">
+            <option value="1">Generation I - Kanto (1-151)</option>
+            <option value="2">Generation II - Johto (152-251)</option>
+            <option value="3">Generation III - Hoenn (252-386)</option>
+            <option value="4">Generation IV - Sinnoh (387-493)</option>
+            <option value="5">Generation V - Unova (494-649)</option>
+            <option value="6">Generation VI - Kalos (650-721)</option>
+            <option value="7">Generation VII - Alola (722-809)</option>
+            <option value="8">Generation VIII - Galar (810-898)</option>
+        </select>
+    </div>
+
+    <div class="controls">
+        <button class="toggle-btn" id="toggleBtn">🚀 Start Pokemon Invasion</button>
+        <button class="collection-btn" id="collectionBtn">📱 View Pokedex</button>
+    </div>
+
+    <div class="footer">
+        Click Pokemon when they appear to catch them!<br>
+        Powered by <a href="https://pokeapi.co/" target="_blank">PokeAPI</a> 🌍 | 
+        <a href="https://github.com/yourusername/pokemon-invasion" target="_blank">GitHub</a> ⭐
+    </div>
+    
+    <script src="js/popup.js"></script>
+</body>
+</html>
