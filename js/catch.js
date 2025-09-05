@@ -132,6 +132,7 @@ touchRegion.bind(touchElement, CustomSwipe, function(e) {
     var screenEle = document.getElementById('screen');
     var screenPos = screenEle.getBoundingClientRect();
     var angle = e.detail.data[0].currentDirection;
+    var rawVelocity = velocity = e.detail.data[0].velocity;
     velocity = (velocity > MAX_VELOCITY) ? MAX_VELOCITY : velocity;
 
     var scalePercent = Math.log(velocity + 1) / Math.log(MAX_VELOCITY + 1);
@@ -175,6 +176,7 @@ function determineThrowResult() {
     
     if (ballCoords.x > targetCoords.x - radius && ballCoords.x < targetCoords.x + radius &&
         ballCoords.y > targetCoords.y - radius && ballCoords.y < targetCoords.y + radius) {
+        // Successful hit - proceed with capture (this counts as a try)
         currentTry++;
         Ball.savePosition();
         var ballOrientation = (ballCoords.x < targetCoords.x) ? -1 : 1;
@@ -190,6 +192,7 @@ function determineThrowResult() {
             }
         });
     } else {
+        // Miss - doesn't count as a try, just reset
         showMissMessage("Missed! Try again.");
         setTimeout(resetState, 400);
     }
@@ -200,6 +203,7 @@ function showMissMessage(text) {
     if (existingMessage) {
         document.body.removeChild(existingMessage);
     }
+    
     const missElement = document.createElement('div');
     missElement.id = 'miss-message';
     missElement.textContent = text;
@@ -255,11 +259,29 @@ function showEscapeMessage() {
     document.body.appendChild(escapeElement);
 }
 
+function handleEscape() {
+    // Pokemon escapes after 3 failed attempts
+    finished = true;
+    
+    Swal.fire({
+        icon: 'error',
+        title: `${pokemonData.displayName} Escaped!`,
+        imageUrl: pokemonData.sprites.official || pokemonData.sprites.default,
+        imageHeight: 150,
+        text: 'The Pokemon got away after 3 failed attempts.',
+        confirmButtonText: 'Continue Hunting',
+        confirmButtonColor: '#ff3860'
+    }).then(() => {
+        window.close();
+    });
+}
+
 function emitParticlesToPokeball() {
     var targetEle = getCenterCoords('target');
     var ballEle = Ball.getElement();
     var ballRect = ballEle.getBoundingClientRect();
     
+    // Get type-based colors for particles
     const typeColors = {
         normal: '#A8A878', fire: '#F08030', water: '#6890F0', electric: '#F8D030',
         grass: '#78C850', ice: '#98D8D8', fighting: '#C03028', poison: '#A040A0',
@@ -267,6 +289,8 @@ function emitParticlesToPokeball() {
         rock: '#B8A038', ghost: '#705898', dragon: '#7038F8', dark: '#705848',
         steel: '#B8B8D0', fairy: '#EE99AC'
     };
+    
+    // Use Pokemon's type colors or default palette
     const pokemonColors = pokemonData.types.map(type => typeColors[type.name] || '#FFFFFF');
     const palette = pokemonColors.length > 0 ? pokemonColors : ['#E4D3A8', '#6EB8C0', '#FFF', '#2196F3'];
     
@@ -383,9 +407,11 @@ function animateCaptureState() {
                 }
             });
         } else {
+            // Capture failed - this counts as a used try
             remainingTries--;
             
             if (remainingTries <= 0) {
+                // No tries left - Pokemon escapes
                 setTimeout(() => {
                     showEscapeMessage();
                     setTimeout(() => window.close(), 1500);
@@ -402,7 +428,18 @@ function animateCaptureState() {
     }, duration * 6);
 }
 
+function showFailedCaptureMessage() {
+    Swal.fire({
+        icon: 'warning',
+        title: 'Almost!',
+        text: `${pokemonData.displayName} broke free! ${remainingTries} ${remainingTries === 1 ? 'try' : 'tries'} remaining.`,
+        timer: 2000,
+        showConfirmButton: false
+    });
+}
+
 function makeItRainConfetti() {
+    // Use Pokemon type colors for confetti
     const typeColors = {
         normal: '#A8A878', fire: '#F08030', water: '#6890F0', electric: '#F8D030',
         grass: '#78C850', ice: '#98D8D8', fighting: '#C03028', poison: '#A040A0',
@@ -410,6 +447,7 @@ function makeItRainConfetti() {
         rock: '#B8A038', ghost: '#705898', dragon: '#7038F8', dark: '#705848',
         steel: '#B8B8D0', fairy: '#EE99AC'
     };
+    
     const pokemonColors = pokemonData.types.map(type => typeColors[type.name] || '#FFFFFF');
     const palette = pokemonColors.length > 0 ? pokemonColors : ['#FFF', '#4aa6fb'];
     
